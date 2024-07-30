@@ -15,7 +15,7 @@ class MavenProject
   def extract_repository_name
     return nil unless @git_url
     parts = @git_url.split('/')
-    return nil if parts.size < 5
+    return nil if parts.size < 4
     parts[3]
   end
 
