@@ -1,8 +1,28 @@
 require 'nokogiri'
 require 'find'
 
+class ParentInfo
+  attr_accessor :group_id, :artifact_id, :version
+
+  def initialize(node)
+    @group_id = node.at_xpath('groupId') ? node.at_xpath('groupId').text : nil
+    @artifact_id = node.at_xpath('artifactId') ? node.at_xpath('artifactId').text : nil
+    @version = node.at_xpath('version') ? node.at_xpath('version').text : nil
+  end
+end
+
+class ProjectInfo
+  attr_accessor :group_id, :artifact_id, :version
+
+  def initialize(doc)
+    @group_id = doc.at_xpath('//project/groupId') ? doc.at_xpath('//project/groupId').text : nil
+    @artifact_id = doc.at_xpath('//project/artifactId') ? doc.at_xpath('//project/artifactId').text : nil
+    @version = doc.at_xpath('//project/version') ? doc.at_xpath('//project/version').text : nil
+  end
+end
+
 class MavenProject
-  attr_accessor :parent, :project, :git_url
+  attr_accessor :parent, :project, :git_url, :sigla
 
   def initialize(pom_file)
     @doc = Nokogiri::XML(File.open(pom_file))
@@ -10,6 +30,7 @@ class MavenProject
     @parent = extract_parent_info
     @project = extract_project_info
     @git_url = extract_git_url(File.dirname(pom_file))
+    @sigla = extract_sigla(@git_url)
   end
 
   private
@@ -18,19 +39,11 @@ class MavenProject
     parent_node = @doc.at_xpath('//parent')
     return nil unless parent_node
 
-    {
-      group_id: parent_node.at_xpath('groupId') ? parent_node.at_xpath('groupId').text : nil,
-      artifact_id: parent_node.at_xpath('artifactId') ? parent_node.at_xpath('artifactId').text : nil,
-      version: parent_node.at_xpath('version') ? parent_node.at_xpath('version').text : nil
-    }
+    ParentInfo.new(parent_node)
   end
 
   def extract_project_info
-    {
-      group_id: @doc.at_xpath('//project/groupId') ? @doc.at_xpath('//project/groupId').text : nil,
-      artifact_id: @doc.at_xpath('//project/artifactId') ? @doc.at_xpath('//project/artifactId').text : nil,
-      version: @doc.at_xpath('//project/version') ? @doc.at_xpath('//project/version').text : nil
-    }
+    ProjectInfo.new(@doc)
   end
 
   def extract_git_url(project_dir)
@@ -46,6 +59,14 @@ class MavenProject
     rescue => e
       puts "Failed to read #{git_config_file}: #{e.message}"
       return nil
+    end
+  end
+
+  def extract_sigla(url)
+    if url && url != 0
+      sigla = url.gsub('https://gitlab.grupo/', '')
+      sigla = sigla.split('/').first
+      sigla
     end
   end
 end
@@ -70,14 +91,9 @@ def analyze_maven_projects(root_directory)
 end
 
 # Use the function to analyze all Maven projects in a directory
-root_directory = 'path/to/your/maven/projects'
+root_directory = '/Users/user/repos'
 projects_info = analyze_maven_projects(root_directory)
 
 projects_info.each do |project|
-  puts "Path: #{project.path}"
-  puts "Parent Info: #{project.parent}"
-  puts "Project Info: #{project.project}"
-  puts "Git URL: #{project.git_url}"
-  puts "Repository Name: #{project.extract_repository_name}"
-  puts '---'
+  puts "#{project.sigla};#{project.project.artifact_id};#{project.project.group_id};#{project.project.version};#{project.parent&.artifact_id};#{project.parent&.group_id};#{project.parent&.version};#{project.git_url}"
 end
