@@ -59,7 +59,7 @@ def analyze_maven_projects(root_directory)
     if File.exist?(pom_file)
       begin
         project = MavenProject.new(pom_file)
-        projects_info << { path: path, parent: project.parent, project: project.project, git_url: project.git_url }
+        projects_info << project
       rescue => e
         puts "Failed to process #{pom_file}: #{e.message}"
       end
@@ -73,10 +73,11 @@ end
 root_directory = 'path/to/your/maven/projects'
 projects_info = analyze_maven_projects(root_directory)
 
-projects_info.each do |info|
-  puts "Path: #{info[:path]}"
-  puts "Parent Info: #{info[:parent]}"
-  puts "Project Info: #{info[:project]}"
-  puts "Git URL: #{info[:git_url]}"
+projects_info.each do |project|
+  puts "Path: #{project.path}"
+  puts "Parent Info: #{project.parent}"
+  puts "Project Info: #{project.project}"
+  puts "Git URL: #{project.git_url}"
+  puts "Repository Name: #{project.extract_repository_name}"
   puts '---'
 end
