@@ -12,13 +12,6 @@ class MavenProject
     @git_url = extract_git_url(File.dirname(pom_file))
   end
 
-  def extract_repository_name
-    return nil unless @git_url
-    parts = @git_url.split('/')
-    return nil if parts.size < 4
-    parts[3]
-  end
-
   private
 
   def extract_parent_info
@@ -46,13 +39,8 @@ class MavenProject
 
     begin
       File.open(git_config_file, 'r') do |file|
-        in_origin_section = false
         file.each_line do |line|
-          in_origin_section = true if line.strip == '[remote "origin"]'
-          if in_origin_section && line.strip.start_with?('url =')
-            return line.strip.split('=', 2)[1].strip
-          end
-          in_origin_section = false if in_origin_section && line.strip.start_with?('[')
+          return $1 if line =~ /^\s*url\s*=\s*(.+)$/
         end
       end
     rescue => e
@@ -71,13 +59,7 @@ def analyze_maven_projects(root_directory)
     if File.exist?(pom_file)
       begin
         project = MavenProject.new(pom_file)
-        projects_info << { 
-          path: path, 
-          parent: project.parent, 
-          project: project.project, 
-          git_url: project.git_url, 
-          repo_name: project.extract_repository_name 
-        }
+        projects_info << { path: path, parent: project.parent, project: project.project, git_url: project.git_url }
       rescue => e
         puts "Failed to process #{pom_file}: #{e.message}"
       end
@@ -96,6 +78,5 @@ projects_info.each do |info|
   puts "Parent Info: #{info[:parent]}"
   puts "Project Info: #{info[:project]}"
   puts "Git URL: #{info[:git_url]}"
-  puts "Repository Name: #{info[:repo_name]}"
   puts '---'
 end
