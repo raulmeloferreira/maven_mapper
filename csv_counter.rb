@@ -1,5 +1,4 @@
 require 'csv'
-require 'byebug'
 
 # Caminho para o seu arquivo CSV
 csv_file_path = 'seu_arquivo.csv'
