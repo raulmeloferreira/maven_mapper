@@ -90,8 +90,31 @@ def analyze_maven_projects(root_directory)
   projects_info
 end
 
-# Use the function to analyze all Maven projects in a directory
-root_directory = '/Users/user/repos'
+def print_help
+  puts <<-HELP
+Usage: ruby maven_mapper.rb [options] <root_directory>
+Options:
+    --help                       Show this help message
+Description:
+    This script analyzes all Maven projects in the specified root directory.
+    It extracts information from each 'pom.xml' file found and prints it in a structured format.
+Example:
+    ruby maven_mapper.rb /path/to/directory
+  HELP
+end
+
+# Process command line arguments
+if ARGV.include?('--help')
+  print_help
+  exit 0
+end
+
+if ARGV.empty?
+  puts "Usage: ruby maven_mapper.rb <root_directory>"
+  exit 1
+end
+
+root_directory = ARGV[0]
 projects_info = analyze_maven_projects(root_directory)
 
 projects_info.each do |project|
