@@ -104,14 +104,9 @@ Example:
 end
 
 # Process command line arguments
-if ARGV.include?('--help')
+if ARGV.include?('--help') || ARGV.empty?
   print_help
   exit 0
-end
-
-if ARGV.empty?
-  puts "Usage: ruby maven_mapper.rb <root_directory>"
-  exit 1
 end
 
 root_directory = ARGV[0]
