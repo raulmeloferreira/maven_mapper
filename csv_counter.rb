@@ -1,7 +1,24 @@
 require 'csv'
 
-# Caminho para o seu arquivo CSV
-csv_file_path = 'seu_arquivo.csv'
+def print_help
+  puts <<-HELP
+Usage: ruby script.rb [options] <csv_file_path>
+Options:
+    --help                       Show this help message
+Description:
+    This script reads a CSV file and counts the occurrences of each (PARENT, PARENT GROUP, VERSION) trio.
+Example:
+    ruby script.rb /path/to/your_file.csv
+  HELP
+end
+
+# Process command line arguments
+if ARGV.include?('--help') || ARGV.empty?
+  print_help
+  exit 0
+end
+
+csv_file_path = ARGV[0]
 
 # Hash para armazenar as contagens
 counts = Hash.new(0)
