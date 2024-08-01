@@ -17,9 +17,12 @@ CSV.foreach(csv_file_path, headers: true, col_sep: ';') do |row|
   counts[[parent, parent_group, version]] += 1
 end
 
+# Ordenar os trios pela contagem em ordem decrescente
+sorted_counts = counts.sort_by { |_, count| -count }
+
 # Imprimir as contagens e calcular o total
 total_count = 0
-counts.each do |trio, count|
+sorted_counts.each do |trio, count|
   puts "PARENT: #{trio[0]}, PARENT GROUP: #{trio[1]}, VERSION: #{trio[2]} - Count: #{count}"
   total_count += count
 end
