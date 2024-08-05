@@ -1,6 +1,3 @@
-Claro! Aqui está o script atualizado com a adição da linha que imprime o cabeçalho do CSV antes do loop final:
-
-```ruby
 require 'nokogiri'
 require 'find'
 
@@ -132,6 +129,3 @@ puts "SIGLA;ID;GROUP;VERSION;PARENT;PARENT GROUP;PARENT VERSION;REPO;JAVA VERSIO
 projects_info.each do |project|
   puts "#{project.sigla};#{project.project.artifact_id};#{project.project.group_id};#{project.project.version};#{project.parent&.artifact_id};#{project.parent&.group_id};#{project.parent&.version};#{project.git_url};#{project.project.java_version}"
 end
-```
-
-Essa alteração adiciona a linha `puts "SIGLA;ID;GROUP;VERSION;PARENT;PARENT GROUP;PARENT VERSION;REPO;JAVA VERSION"` antes do loop final, para que o cabeçalho do CSV seja impresso primeiro.
