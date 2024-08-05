@@ -104,14 +104,14 @@ end
 
 def print_help
   puts <<-HELP
-Usage: ruby maven_mapper.rb [options] <root_directory> <output_csv>
+Usage: ruby maven_mapper.rb [options] <root_directory>
 Options:
     --help                       Show this help message
 Description:
     This script analyzes all Maven projects in the specified root directory.
     It extracts information from each 'pom.xml' file found and prints it in a structured format.
 Example:
-    ruby maven_mapper.rb /path/to/directory output.csv
+    ruby maven_mapper.rb /path/to/directory
   HELP
 end
 
@@ -122,27 +122,22 @@ if ARGV.include?('--help') || ARGV.empty?
 end
 
 root_directory = ARGV[0]
-output_csv = ARGV[1] || 'output.csv'
-
 projects_info = analyze_maven_projects(root_directory)
 
-# Open CSV file for writing
-CSV.open(output_csv, 'wb', col_sep: ';') do |csv|
-  # Write CSV header
-  csv << ["SIGLA", "ID", "GROUP", "VERSION", "PARENT", "PARENT GROUP", "PARENT VERSION", "REPO", "JAVA VERSION"]
+# Print CSV header
+puts "SIGLA;ID;GROUP;VERSION;PARENT;PARENT GROUP;PARENT VERSION;REPO;JAVA VERSION"
 
-  # Write project information
-  projects_info.each do |project|
-    csv << [
-      project.sigla,
-      project.project.artifact_id,
-      project.project.group_id,
-      project.project.version,
-      project.parent&.artifact_id,
-      project.parent&.group_id,
-      project.parent&.version,
-      project.git_url,
-      project.project.java_version
-    ]
-  end
+# Print project information
+projects_info.each do |project|
+  puts [
+    project.sigla,
+    project.project.artifact_id,
+    project.project.group_id,
+    project.project.version,
+    project.parent&.artifact_id,
+    project.parent&.group_id,
+    project.parent&.version,
+    project.git_url,
+    project.project.java_version
+  ].join(';')
 end
