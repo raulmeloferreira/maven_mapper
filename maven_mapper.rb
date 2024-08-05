@@ -12,12 +12,23 @@ class ParentInfo
 end
 
 class ProjectInfo
-  attr_accessor :group_id, :artifact_id, :version
+  attr_accessor :group_id, :artifact_id, :version, :java_version
 
   def initialize(doc)
     @group_id = doc.at_xpath('//project/groupId') ? doc.at_xpath('//project/groupId').text : nil
     @artifact_id = doc.at_xpath('//project/artifactId') ? doc.at_xpath('//project/artifactId').text : nil
     @version = doc.at_xpath('//project/version') ? doc.at_xpath('//project/version').text : nil
+    @java_version = extract_java_version(doc)
+  end
+
+  private
+
+  def extract_java_version(doc)
+    java_version = doc.at_xpath('//properties/maven.compiler.source') ? doc.at_xpath('//properties/maven.compiler.source').text : nil
+    return java_version if java_version
+
+    java_version = doc.at_xpath('//build/plugins/plugin[artifactId="maven-compiler-plugin"]/configuration/source') ? doc.at_xpath('//build/plugins/plugin[artifactId="maven-compiler-plugin"]/configuration/source').text : nil
+    java_version
   end
 end
 
@@ -113,5 +124,5 @@ root_directory = ARGV[0]
 projects_info = analyze_maven_projects(root_directory)
 
 projects_info.each do |project|
-  puts "#{project.sigla};#{project.project.artifact_id};#{project.project.group_id};#{project.project.version};#{project.parent&.artifact_id};#{project.parent&.group_id};#{project.parent&.version};#{project.git_url}"
+  puts "#{project.sigla};#{project.project.artifact_id};#{project.project.group_id};#{project.project.version};#{project.parent&.artifact_id};#{project.parent&.group_id};#{project.parent&.version};#{project.git_url};#{project.project.java_version}"
 end
