@@ -1,10 +1,13 @@
 #!/usr/bin/env ruby
 require 'fileutils'
 
+# Constante para a URL base do GitLab
+GITLAB_URL_BASE = 'https://gitlab.grupo/'
+
 # Método para extrair a sigla da URL do git
 def extract_sigla(url)
   if url && url != 0
-    sigla = url.gsub('https://gitlab.grupo/', '')
+    sigla = url.gsub(GITLAB_URL_BASE, '')
     sigla = sigla.split('/').first
     sigla
   end
@@ -50,7 +53,7 @@ end
 
 # Checando se os diretórios de origem e destino foram passados como parâmetros
 if ARGV.length != 2
-  puts "Uso: ruby script.rb <diretório_origem> <diretório_destino>"
+  puts "Uso: ruby ldm_finder.rb <diretório_origem> <diretório_destino>"
   exit
 end
 
