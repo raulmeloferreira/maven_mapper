@@ -52,9 +52,12 @@ else
 
   dependency_counts = count_dependencies(csv_file, map_with_version, log)
 
+  # Ordenando por número de ocorrências de forma decrescente
+  sorted_dependencies = dependency_counts.sort_by { |key, count| -count }
+
   # Exibindo os resultados
-  puts "Dependency Count Results:"
-  dependency_counts.each do |key, count|
+  puts "Dependency Count Results (ordered by occurrences):"
+  sorted_dependencies.each do |key, count|
     puts "#{key} -> #{count} occurrences"
   end
 
