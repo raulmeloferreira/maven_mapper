@@ -2,6 +2,9 @@ require 'nokogiri'
 require 'find'
 require 'csv'
 
+# Constante para a URL base do GitLab
+GITLAB_URL_BASE = 'https://gitlab.grupo/'
+
 class ParentInfo
   attr_accessor :group_id, :artifact_id, :version
 
@@ -34,7 +37,7 @@ class ProjectInfo
 end
 
 class MavenProject
-  attr_accessor :parent, :project, :git_url, :sigla
+  attr_accessor :parent, :project, :git_url, :sigla, :docker_image
 
   def initialize(pom_file)
     @doc = Nokogiri::XML(File.open(pom_file))
@@ -43,6 +46,7 @@ class MavenProject
     @project = extract_project_info
     @git_url = extract_git_url(File.dirname(pom_file))
     @sigla = extract_sigla(@git_url)
+    @docker_image = extract_docker_image(File.dirname(pom_file))
   end
 
   private
@@ -76,9 +80,25 @@ class MavenProject
 
   def extract_sigla(url)
     if url && url != 0
-      sigla = url.gsub('https://gitlab.grupo/', '')
+      sigla = url.gsub(GITLAB_URL_BASE, '')
       sigla = sigla.split('/').first
       sigla
+    end
+  end
+
+  def extract_docker_image(project_dir)
+    dockerfile_path = File.join(project_dir, 'Dockerfile')
+    return nil unless File.exist?(dockerfile_path)
+
+    begin
+      File.open(dockerfile_path, 'r') do |file|
+        file.each_line do |line|
+          return $1.strip if line =~ /^FROM\s+(.+)$/
+        end
+      end
+    rescue => e
+      puts "Failed to read Dockerfile in #{project_dir}: #{e.message}"
+      return nil
     end
   end
 end
@@ -125,7 +145,7 @@ root_directory = ARGV[0]
 projects_info = analyze_maven_projects(root_directory)
 
 # Print CSV header
-puts "SIGLA;ID;GROUP;VERSION;PARENT;PARENT GROUP;PARENT VERSION;REPO;JAVA VERSION"
+puts "SIGLA;ID;GROUP;VERSION;PARENT;PARENT GROUP;PARENT VERSION;REPO;JAVA VERSION;DOCKER IMAGE"
 
 # Print project information
 projects_info.each do |project|
@@ -138,6 +158,7 @@ projects_info.each do |project|
     project.parent&.group_id,
     project.parent&.version,
     project.git_url,
-    project.project.java_version
+    project.project.java_version,
+    project.docker_image
   ].join(';')
 end
